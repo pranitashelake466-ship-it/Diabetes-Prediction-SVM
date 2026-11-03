@@ -1,98 +1,174 @@
 
 import streamlit as st
-import numpy as np
 import pandas as pd
 import joblib
 
-# Load trained SVM pipeline
+# Load trained machine learning pipeline
 model = joblib.load("diabetes_svm_model.pkl")
 
-# Page configuration
 st.set_page_config(
     page_title="Diabetes Prediction System",
     page_icon="🩺",
     layout="wide"
 )
 
-# Header
-st.title("Diabetes Prediction System")
-st.write(
-    "A Machine Learning application using "
-    "Support Vector Machine (SVM)."
+# Custom styling
+st.markdown("""
+<style>
+.main-title {
+    font-size: 35px;
+    font-weight: bold;
+    color: #176B87;
+}
+.subtitle {
+    font-size: 17px;
+    color: #555555;
+}
+.info-card {
+    background-color: #EAF4F4;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# Sidebar
+st.sidebar.title("Diabetes Prediction")
+st.sidebar.write("Machine Learning Based Healthcare Application")
+
+page = st.sidebar.radio(
+    "Navigation",
+    ["Home", "Diabetes Prediction", "Batch Prediction",
+     "About the Model", "Dataset Information", "How to Use"]
 )
 
-st.divider()
+st.sidebar.divider()
+st.sidebar.caption("Developed using Python, Streamlit and SVM")
 
-st.subheader("Enter Patient Information")
+# Feature columns
+features = [
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age"
+]
 
-# Input fields
-col1, col2 = st.columns(2)
+# HOME PAGE
+if page == "Home":
 
-with col1:
-    pregnancies = st.number_input(
-        "Pregnancies",
-        min_value=0,
-        max_value=20,
-        value=1
+    st.markdown(
+        '<p class="main-title">Diabetes Prediction System</p>',
+        unsafe_allow_html=True
     )
 
-    glucose = st.number_input(
-        "Glucose Level",
-        min_value=0.0,
-        max_value=300.0,
-        value=120.0
+    st.markdown(
+        '<p class="subtitle">A Machine Learning application '
+        'for estimating diabetes risk from health-related inputs.</p>',
+        unsafe_allow_html=True
     )
 
-    blood_pressure = st.number_input(
-        "Blood Pressure",
-        min_value=0.0,
-        max_value=200.0,
-        value=70.0
+    st.image(
+        "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d",
+        use_container_width=True
     )
 
-    skin_thickness = st.number_input(
-        "Skin Thickness",
-        min_value=0.0,
-        max_value=100.0,
-        value=20.0
+    st.header("Project Overview")
+
+    st.write("""
+    Diabetes is a chronic health condition that affects how the body
+    regulates blood glucose levels.
+
+    This project uses a Support Vector Machine (SVM) classification
+    algorithm to analyze selected health-related parameters and
+    generate a model prediction.
+    """)
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.info("**Algorithm**\n\nSupport Vector Machine")
+
+    with col2:
+        st.info("**Technology**\n\nPython and Streamlit")
+
+    with col3:
+        st.info("**Application**\n\nHealth Data Classification")
+
+    st.header("Key Features")
+
+    st.markdown("""
+    - Individual diabetes prediction.
+    - Batch prediction using CSV files.
+    - Machine learning model information.
+    - Explanation of input health parameters.
+    - Downloadable prediction results.
+    - Simple and user-friendly interface.
+    """)
+
+    st.warning(
+        "This application is an educational machine learning project. "
+        "It is not a medical diagnostic tool."
     )
 
-with col2:
-    insulin = st.number_input(
-        "Insulin Level",
-        min_value=0.0,
-        max_value=900.0,
-        value=80.0
-    )
 
-    bmi = st.number_input(
-        "BMI",
-        min_value=0.0,
-        max_value=100.0,
-        value=25.0
-    )
+# SINGLE PREDICTION PAGE
+elif page == "Diabetes Prediction":
 
-    diabetes_pedigree = st.number_input(
-        "Diabetes Pedigree Function",
-        min_value=0.0,
-        max_value=3.0,
-        value=0.5
-    )
+    st.title("Diabetes Prediction")
+    st.write("Enter the required information below.")
 
-    age = st.number_input(
-        "Age",
-        min_value=1,
-        max_value=120,
-        value=30
-    )
+    with st.form("prediction_form"):
 
-st.divider()
+        col1, col2 = st.columns(2)
 
-# Prediction
-if st.button("Predict Diabetes", type="primary"):
+        with col1:
+            pregnancies = st.number_input(
+                "Number of Pregnancies", 0, 20, 1
+            )
 
-    input_data = pd.DataFrame(
-        [[
+            glucose = st.number_input(
+                "Glucose Level", 0.0, 300.0, 120.0
+            )
+
+            blood_pressure = st.number_input(
+                "Blood Pressure", 0.0, 200.0, 70.0
+            )
+
+            skin_thickness = st.number_input(
+                "Skin Thickness", 0.0, 100.0, 20.0
+            )
+
+        with col2:
+            insulin = st.number_input(
+                "Insulin Level", 0.0, 900.0, 80.0
+            )
+
+            bmi = st.number_input(
+                "BMI", 0.0, 100.0, 25.0
+            )
+
+            diabetes_pedigree = st.number_input(
+                "Diabetes Pedigree Function", 0.0, 3.0, 0.5
+            )
+
+            age = st.number_input(
+                "Age", 1, 120, 30
+            )
+
+        submitted = st.form_submit_button(
+            "Predict Diabetes",
+            type="primary",
+            use_container_width=True
+        )
+
+    if submitted:
+
+        input_data = pd.DataFrame([[
             pregnancies,
             glucose,
             blood_pressure,
@@ -101,43 +177,234 @@ if st.button("Predict Diabetes", type="primary"):
             bmi,
             diabetes_pedigree,
             age
-        ]],
-        columns=[
-            "Pregnancies",
-            "Glucose",
-            "BloodPressure",
-            "SkinThickness",
-            "Insulin",
-            "BMI",
-            "DiabetesPedigreeFunction",
-            "Age"
-        ]
+        ]], columns=features)
+
+        prediction = model.predict(input_data)[0]
+
+        st.divider()
+        st.subheader("Prediction Result")
+
+        if prediction == 1:
+            st.error(
+                "The model predicts the positive diabetes class."
+            )
+        else:
+            st.success(
+                "The model predicts the negative diabetes class."
+            )
+
+        st.write("**Entered Information**")
+        st.dataframe(input_data, use_container_width=True)
+
+        st.warning(
+            "This prediction is generated by a machine learning model. "
+            "It does not confirm or rule out diabetes. "
+            "Please consult a qualified healthcare professional."
+        )
+
+
+# BATCH PREDICTION PAGE
+elif page == "Batch Prediction":
+
+    st.title("Batch Prediction")
+    st.write(
+        "Upload a CSV file containing multiple records "
+        "to generate predictions."
     )
-
-    prediction = model.predict(input_data)[0]
-
-    st.subheader("Prediction Result")
-
-    if prediction == 1:
-        st.error(
-            "The model predicts a higher likelihood "
-            "of diabetes."
-        )
-    else:
-        st.success(
-            "The model predicts a lower likelihood "
-            "of diabetes."
-        )
 
     st.info(
-        "This result is generated by a machine learning "
-        "model and is not a medical diagnosis. "
-        "Consult a qualified healthcare professional."
+        "Your CSV must contain these eight columns: "
+        + ", ".join(features)
     )
 
+    uploaded_file = st.file_uploader(
+        "Upload CSV File",
+        type=["csv"]
+    )
+
+    if uploaded_file is not None:
+
+        try:
+            data = pd.read_csv(uploaded_file)
+
+            missing_columns = [
+                col for col in features if col not in data.columns
+            ]
+
+            if missing_columns:
+                st.error(
+                    "Missing columns: " + ", ".join(missing_columns)
+                )
+
+            elif data.empty:
+                st.error("The uploaded CSV file is empty.")
+
+            else:
+                st.subheader("Uploaded Dataset")
+                st.dataframe(data.head(), use_container_width=True)
+
+                if st.button("Generate Batch Predictions"):
+
+                    input_data = data[features].copy()
+
+                    predictions = model.predict(input_data)
+
+                    results = data.copy()
+
+                    results["Prediction"] = predictions
+                    results["Prediction Result"] = [
+                        "Positive Class" if value == 1
+                        else "Negative Class"
+                        for value in predictions
+                    ]
+
+                    st.subheader("Prediction Results")
+                    st.dataframe(
+                        results,
+                        use_container_width=True
+                    )
+
+                    st.download_button(
+                        "Download Prediction Results",
+                        results.to_csv(index=False).encode("utf-8"),
+                        file_name="diabetes_predictions.csv",
+                        mime="text/csv"
+                    )
+
+        except Exception as e:
+            st.error(f"Unable to process the file: {e}")
+
+
+# ABOUT MODEL PAGE
+elif page == "About the Model":
+
+    st.title("About the Machine Learning Model")
+
+    st.header("Support Vector Machine (SVM)")
+
+    st.write("""
+    Support Vector Machine is a supervised machine learning
+    algorithm commonly used for classification tasks.
+
+    It identifies a decision boundary that separates different
+    classes in the feature space.
+    """)
+
+    st.subheader("How Does SVM Work?")
+
+    st.markdown("""
+    1. Accepts input features from the dataset.
+    2. Processes missing values using median imputation.
+    3. Scales the input features using StandardScaler.
+    4. Uses the trained SVM classifier.
+    5. Produces a predicted class.
+    """)
+
+    st.subheader("Model Pipeline")
+
+    st.code("""
+Input Data
+    |
+Median Imputation
+    |
+Feature Scaling
+    |
+Support Vector Machine
+    |
+Prediction
+    """, language="text")
+
+    st.subheader("Technologies Used")
+
+    st.markdown("""
+    - Python
+    - Pandas
+    - Scikit-learn
+    - NumPy
+    - Joblib
+    - Streamlit
+    """)
+
+    st.info(
+        "The deployed model uses a linear SVM classifier "
+        "with C = 0.1."
+    )
+
+
+# DATASET INFORMATION PAGE
+elif page == "Dataset Information":
+
+    st.title("Dataset Information")
+
+    st.write("""
+    The model uses eight input features related to patient
+    health information. These features are passed to the
+    trained classification pipeline.
+    """)
+
+    descriptions = {
+        "Pregnancies": "Number of times pregnant.",
+        "Glucose": "Plasma glucose concentration.",
+        "BloodPressure": "Diastolic blood pressure.",
+        "SkinThickness": "Triceps skin fold thickness.",
+        "Insulin": "Serum insulin level.",
+        "BMI": "Body Mass Index.",
+        "DiabetesPedigreeFunction": "A measure associated with family history of diabetes.",
+        "Age": "Age of the individual in years."
+    }
+
+    for feature, description in descriptions.items():
+        with st.expander(feature):
+            st.write(description)
+
+    st.subheader("Input Features")
+
+    feature_table = pd.DataFrame({
+        "Feature": list(descriptions.keys()),
+        "Description": list(descriptions.values())
+    })
+
+    st.dataframe(feature_table, use_container_width=True)
+
+
+# HOW TO USE PAGE
+elif page == "How to Use":
+
+    st.title("How to Use the Application")
+
+    st.subheader("For Individual Prediction")
+
+    st.markdown("""
+    1. Open the Diabetes Prediction page.
+    2. Enter all eight input values.
+    3. Click Predict Diabetes.
+    4. Review the predicted class.
+    """)
+
+    st.subheader("For Batch Prediction")
+
+    st.markdown("""
+    1. Prepare a CSV file with the eight required columns.
+    2. Open Batch Prediction.
+    3. Upload the CSV file.
+    4. Click Generate Batch Predictions.
+    5. Download the results.
+    """)
+
+    st.subheader("Important Disclaimer")
+
+    st.warning("""
+    This application is developed for academic and educational
+    purposes. Predictions depend on the model and input data.
+    They should not be used for medical decisions, diagnosis,
+    or treatment. Consult a qualified healthcare professional.
+    """)
+
+
+# FOOTER
 st.divider()
 
 st.caption(
-    "Developed as an academic Machine Learning project "
-    "using Python, Streamlit and SVM."
+    "Diabetes Prediction System | Machine Learning Project | "
+    "Python | Scikit-learn | Streamlit"
 )
